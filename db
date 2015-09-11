@@ -1,0 +1,104 @@
+package com.example.memphis.sql;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+import java.util.ArrayList;
+import java.util.List;
+public class MemphisDatabase extends SQLiteOpenHelper {
+    //declare db--> name label version
+    private static final String DATABASE_NAME = "MEMPHIS";
+    private static final String TABLE_LABEL = "Table_Label";
+    private static final int DATABASE_VERSION = 1;
+    //
+    //declare columns
+    private static final String KEY_ID = "id";
+    private static final String KEY_TITLE = "title";
+    private static final String KEY_DATA = "data";
+
+    public MemphisDatabase(Context _context){
+        super(_context , DATABASE_NAME , null , DATABASE_VERSION);
+    }
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        //create table query -- >string commend
+         //like            //CREATE TABLE        label        (  _id         int                ,  _title          TEXT,    _data       TEXT);
+        String CREATE_TABLE="CREATE TABLE " + TABLE_LABEL + "(" + KEY_ID + " INTEGER PRIMARY KEY," + KEY_TITLE + " TEXT," + KEY_DATA + " TEXT)";
+        db.execSQL(CREATE_TABLE);
+
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // Drop older table if existed
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_LABEL);
+
+        // Create tables again
+        onCreate(db);
+    }
+    //self methods
+    public void InsertLabel(String _title , String _data){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues myvals = new ContentValues();
+        //put values
+        myvals.put(KEY_TITLE , _title);
+        myvals.put(KEY_DATA ,_data);
+        //insert command
+        db.insert(TABLE_LABEL ,null , myvals);
+        //and close db for sure
+        db.close();
+    }
+    public void UpdateDb(int _id , String _title , String _data) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues vals = new ContentValues();
+        vals.put(KEY_TITLE, _title);
+        vals.put(KEY_DATA, _data);
+        String where = KEY_ID + "=" + String.valueOf(_id);
+        try {
+            db.update(TABLE_LABEL, vals, where, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        db.close();
+    }
+    public Word getItem(int _id){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cur = db.query(TABLE_LABEL , new String[] {KEY_ID,KEY_TITLE,KEY_DATA} , KEY_ID + "=?" , new String[]{String.valueOf(_id)} ,null,null,null,null);
+        if(cur!=null){
+            cur.moveToFirst();
+        }
+        Word _word = new Word(Integer.parseInt(cur.getString(0)),cur.getString(1),cur.getString(2));
+        return _word;
+        }
+
+    public void Del_Word(int _id){
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(TABLE_LABEL,KEY_ID + "=" + _id ,null );
+        db.close();
+    }
+
+    public List<Word> GetWords(){
+        List<Word> words = new ArrayList<>();
+        //select all query
+        String select_query = "SELECT * FROM " + TABLE_LABEL;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cur = db.rawQuery(select_query , null);
+        //loop
+        if(cur.moveToFirst()){
+            do{
+                Word _word = new Word();
+                _word.setId(Integer.parseInt(cur.getString(0)));
+                _word.setTitle(cur.getString(1));
+                _word.setData(cur.getString(2));
+                words.add(_word);
+            }while(cur.moveToNext());
+        }
+        cur.close();
+        db.close();
+        return words;
+    }
+
+}
