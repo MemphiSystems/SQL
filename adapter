@@ -1,0 +1,60 @@
+package com.example.memphis.sql;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.TextView;
+
+import java.util.List;
+
+/**
+ * Created by Memphis on 9/5/2015.
+ */
+//auto imp methods
+
+public class MemphisAdapter extends BaseAdapter {
+    List<Word> mlist;
+    Context mcontext;
+    //create self method for defining with vars
+    public MemphisAdapter(List<Word> _mlist , Context _context) {
+        super();
+        this.mlist = _mlist;
+        this.mcontext=_context;
+    }
+
+    @Override
+    public int getCount() {
+        return mlist.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return mlist.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return mlist.get(position).getId();
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View v = convertView;
+        if(v==null){
+            LayoutInflater mInflater = (LayoutInflater) mcontext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            v = mInflater.inflate(R.layout.layout_list, null);
+        }
+        //get list tv' s
+        final TextView mtv1 = (TextView)v.findViewById(R.id.tv1);
+        final TextView mtv2 = (TextView)v.findViewById(R.id.tv2) ;
+        final String _title  = mlist.get(position).getTitle();
+        final String _data  = mlist.get(position).getData();
+        //set list tv' s
+        mtv1.setText(_title);
+        mtv2.setText(_data);
+        //return view
+        return v;
+    }
+}
